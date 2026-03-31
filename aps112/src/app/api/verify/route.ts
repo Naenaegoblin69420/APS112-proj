@@ -2,19 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { geminiPro } from '@/lib/gemini';
 import { findCandidates } from '@/lib/matcher';
 import { getAllRules } from '@/lib/rules';
+import { detectValueMismatch } from '@/lib/mismatch';
 import { ExtractedClaim, VerificationResult, VerificationReport } from '@/types';
 
-const COMPARE_PROMPT = `You are an Ontario Fire Code compliance checker.
+const COMPARE_PROMPT = `You are an Ontario Fire Code fact-checker.
 
-Given a CLAIM extracted from AI-generated text, and a list of CANDIDATE RULES from the Ontario Fire Code, determine whether the claim is accurate.
+Your task: determine whether a CLAIM accurately states what the Ontario Fire Code requires.
+You are NOT checking whether a practice would still be compliant or whether it is stricter than the code.
+You ARE checking whether the claim is a factually correct statement of the code's actual requirement.
 
 Respond ONLY with a valid JSON object — no markdown, no backticks:
-{"status":"verified"|"conflict"|"unknown","matchedRuleId":"<rule ID>"|null,"explanation":"<1-2 sentence explanation>","claimedValue":"<value as stated>"|null,"ruleValue":"<actual rule value>"|null,"confidence":"High"|"Medium"|"Low"}
+{"status":"verified"|"conflict"|"unknown","matchedRuleId":"<rule ID>"|null,"explanation":"<1-2 sentence explanation>","claimedValue":"<value as stated in the claim>"|null,"ruleValue":"<exact value/frequency/threshold from the matched rule>"|null,"confidence":"High"|"Medium"|"Low"}
 
 Status definitions:
-- "verified": claim is consistent with a matching rule
-- "conflict": claim contradicts a matching rule (wrong value, wrong direction, wrong constraint type, etc.)
-- "unknown": no candidate rule clearly covers this claim`;
+- "verified": the claim accurately states the exact requirement in the matched rule — same value, frequency, threshold, unit, constraint direction, and scope.
+- "conflict": the claim misrepresents what the code requires. This includes ANY mismatch in value, frequency, threshold, unit, direction, scope, or constraint type — even if the claim is stricter or more conservative than the code.
+- "unknown": no candidate rule clearly covers this claim.
+
+CRITICAL — stricter does NOT mean verified. Examples:
+- Rule says monthly inspection → claim says weekly inspection → CONFLICT (weekly is not what the code requires, even though it is more frequent)
+- Rule says minimum 1100 mm → claim says code requires 1200 mm → CONFLICT (1200 mm is not what the code specifies)
+- Rule says maximum 10 L → claim says code requires no more than 8 L → CONFLICT (8 L is not the code's actual limit)
+- Rule says annual inspection → claim says annual inspection → verified
+
+Always extract claimedValue and ruleValue as concise comparable strings (e.g. "weekly", "monthly", "1100 mm", "10 L").`;
 
 function computeScore(results: VerificationResult[]): number {
   if (results.length === 0) return 100;
@@ -71,11 +82,28 @@ export async function POST(req: NextRequest) {
           ? (allRules.find(r => r.id === parsed.matchedRuleId) ?? candidateRules[0])
           : undefined;
 
+        // Deterministic override: if the LLM said "verified" but the claimed
+        // and rule values are demonstrably different, force a conflict.
+        let finalStatus = parsed.status;
+        let finalExplanation = parsed.explanation;
+
+        if (
+          parsed.status === 'verified' &&
+          parsed.claimedValue &&
+          parsed.ruleValue
+        ) {
+          const check = detectValueMismatch(parsed.claimedValue, parsed.ruleValue);
+          if (check.mismatch) {
+            finalStatus = 'conflict';
+            finalExplanation = check.explanation!;
+          }
+        }
+
         return {
           claim,
-          status: parsed.status,
+          status: finalStatus,
           matchedRule,
-          explanation: parsed.explanation,
+          explanation: finalExplanation,
           claimedValue: parsed.claimedValue ?? undefined,
           ruleValue: parsed.ruleValue ?? undefined,
           confidence: parsed.confidence,
