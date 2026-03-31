@@ -49,9 +49,9 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col bg-[#212121]">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-[#171717] border-b border-white/10 px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -60,8 +60,8 @@ export default function HomePage() {
             </svg>
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-gray-900 leading-none">OFC Compliance Checker</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Ontario Fire Code · O. Reg. 213/07 · 272 rules</p>
+            <h1 className="text-sm font-semibold text-white leading-none">OFC Compliance Checker</h1>
+            <p className="text-xs text-[#8e8ea0] mt-0.5">Ontario Fire Code · O. Reg. 213/07 · 272 rules</p>
           </div>
         </div>
       </header>
@@ -70,8 +70,8 @@ export default function HomePage() {
       <div className="flex-1 flex items-start justify-center px-4 pt-16 pb-12">
         <div className="w-full max-w-2xl">
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Verify fire code claims</h2>
-            <p className="text-gray-500 text-sm leading-relaxed">
+            <h2 className="text-2xl font-semibold text-white mb-2">Verify fire code claims</h2>
+            <p className="text-[#8e8ea0] text-sm leading-relaxed">
               Paste AI-generated text that makes claims about the Ontario Fire Code. The system extracts each claim, matches it against 272 rules, and flags any discrepancies.
             </p>
           </div>
@@ -84,19 +84,19 @@ export default function HomePage() {
                 placeholder={EXAMPLE}
                 rows={8}
                 disabled={loading}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 resize-y focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-60 shadow-sm"
+                className="w-full rounded-xl border border-white/10 bg-[#2f2f2f] px-4 py-3 text-sm text-white placeholder-[#8e8ea0] resize-y focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-60"
               />
               {text.length > 0 && (
-                <span className="absolute bottom-3 right-3 text-xs text-gray-400">{text.length} chars</span>
+                <span className="absolute bottom-3 right-3 text-xs text-[#8e8ea0]">{text.length} chars</span>
               )}
             </div>
 
             {error && (
-              <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5">
-                <svg className="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-start gap-2 rounded-lg bg-red-950/60 border border-red-800/60 px-3 py-2.5">
+                <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
                 </svg>
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="text-sm text-red-300">{error}</p>
               </div>
             )}
 
@@ -104,11 +104,11 @@ export default function HomePage() {
               <button
                 type="submit"
                 disabled={loading || text.trim().length < 20}
-                className="flex items-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 transition-colors"
+                className="flex items-center gap-2 rounded-lg bg-white hover:bg-gray-100 disabled:bg-[#3f3f46] disabled:text-[#8e8ea0] disabled:cursor-not-allowed text-[#212121] text-sm font-medium px-5 py-2.5 transition-colors"
               >
                 {loading ? (
                   <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 animate-spin text-[#8e8ea0]" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
@@ -121,7 +121,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => { setText(EXAMPLE); setError(''); }}
-                className="text-sm text-gray-500 hover:text-gray-700 underline underline-offset-2"
+                className="text-sm text-[#8e8ea0] hover:text-white underline underline-offset-2 transition-colors"
               >
                 Load example
               </button>
@@ -135,9 +135,9 @@ export default function HomePage() {
               { label: 'AI + match', desc: 'Gemini + keyword engine' },
               { label: 'Scored /100', desc: 'Confidence-weighted result' },
             ].map(c => (
-              <div key={c.label} className="rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-                <p className="text-sm font-semibold text-gray-900">{c.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{c.desc}</p>
+              <div key={c.label} className="rounded-xl border border-white/10 bg-[#2f2f2f] px-4 py-3">
+                <p className="text-sm font-semibold text-white">{c.label}</p>
+                <p className="text-xs text-[#8e8ea0] mt-0.5">{c.desc}</p>
               </div>
             ))}
           </div>
