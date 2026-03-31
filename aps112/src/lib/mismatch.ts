@@ -67,16 +67,20 @@ export function detectValueMismatch(
   claimedValue: string,
   ruleValue: string,
 ): MismatchResult {
+  // Coerce to string — the LLM sometimes returns bare numbers (e.g. 1100 instead of "1100 mm")
+  const claimed = String(claimedValue);
+  const rule = String(ruleValue);
+
   // --- Frequency comparison ---
-  const claimedDays = normalizeFrequencyToDays(claimedValue);
-  const ruleDays = normalizeFrequencyToDays(ruleValue);
+  const claimedDays = normalizeFrequencyToDays(claimed);
+  const ruleDays = normalizeFrequencyToDays(rule);
 
   if (claimedDays !== null && ruleDays !== null && claimedDays !== ruleDays) {
     return {
       mismatch: true,
       explanation:
-        `The claim states a ${claimedValue} inspection/review interval, but ` +
-        `the matched Ontario Fire Code rule specifies ${ruleValue}. ` +
+        `The claim states a ${claimed} inspection/review interval, but ` +
+        `the matched Ontario Fire Code rule specifies ${rule}. ` +
         `Because this project checks whether the claim accurately states what ` +
         `the code requires, any difference in the specified interval is a conflict ` +
         `— even when the claimed interval is more frequent than the rule.`,
@@ -84,8 +88,8 @@ export function detectValueMismatch(
   }
 
   // --- Numeric + unit comparison ---
-  const claimedNum = normalizeNumeric(claimedValue);
-  const ruleNum = normalizeNumeric(ruleValue);
+  const claimedNum = normalizeNumeric(claimed);
+  const ruleNum = normalizeNumeric(rule);
 
   if (
     claimedNum &&
@@ -96,8 +100,8 @@ export function detectValueMismatch(
     return {
       mismatch: true,
       explanation:
-        `The claim states a value of ${claimedValue}, but the matched ` +
-        `Ontario Fire Code rule specifies ${ruleValue}. ` +
+        `The claim states a value of ${claimed}, but the matched ` +
+        `Ontario Fire Code rule specifies ${rule}. ` +
         `Because this project checks whether the claim accurately states what ` +
         `the code requires, any difference in the specified value is a conflict ` +
         `— even when the claimed value is stricter or more conservative than the rule.`,
