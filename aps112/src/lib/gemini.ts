@@ -7,5 +7,5 @@ function getClient() {
 }
 
 export const geminiPro = {
-  generateContent: (prompt: string) => getClient().getGenerativeModel({ model: 'gemini-1.5-pro' }).generateContent(prompt),
+  generateContent: (prompt: string) => getClient().getGenerativeModel({ model: 'gemini-2.5-flash' }).generateContent(prompt),
 };
