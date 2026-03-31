@@ -72,7 +72,7 @@ function ClaimCard({ result }: { result: VerificationResult }) {
   const s = statusConfig[result.status];
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[#2f2f2f] overflow-hidden">
+    <div className="glass-card rounded-xl overflow-hidden">
       {/* Header row */}
       <button
         onClick={() => setOpen(!open)}
@@ -106,11 +106,11 @@ function ClaimCard({ result }: { result: VerificationResult }) {
 
           {(result.claimedValue || result.ruleValue) && (
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+              <div className="rounded-lg glass-card px-3 py-2">
                 <p className="text-xs text-[#8e8ea0] mb-1">Claimed value</p>
                 <p className="text-sm font-medium text-white">{result.claimedValue ?? '—'}</p>
               </div>
-              <div className="rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+              <div className="rounded-lg glass-card px-3 py-2">
                 <p className="text-xs text-[#8e8ea0] mb-1">Rule value</p>
                 <p className="text-sm font-medium text-white">{result.ruleValue ?? '—'}</p>
               </div>
@@ -118,7 +118,7 @@ function ClaimCard({ result }: { result: VerificationResult }) {
           )}
 
           {result.matchedRule && (
-            <div className="mt-3 rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+            <div className="mt-3 rounded-lg glass-card px-3 py-2">
               <p className="text-xs text-[#8e8ea0] mb-1">Matched rule</p>
               <p className="text-sm text-gray-200">
                 <span className="font-mono text-xs bg-white/10 px-1 py-0.5 rounded mr-2">{result.matchedRule.id}</span>
@@ -152,7 +152,7 @@ export default function ResultsPage() {
 
   if (!report) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-[#212121]">
+      <main className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #111111 70%, #000000 100%)' }}>
         <div className="flex items-center gap-2 text-[#8e8ea0]">
           <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
@@ -167,12 +167,12 @@ export default function ResultsPage() {
   const checkedAt = new Date(report.checkedAt).toLocaleString();
 
   return (
-    <main className="min-h-screen bg-[#212121]">
+    <main className="min-h-screen" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #111111 70%, #000000 100%)' }}>
       {/* Header */}
-      <header className="bg-[#171717] border-b border-white/10 px-6 py-4">
+      <header className="glass-header px-6 py-4 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-red-600/80 flex items-center justify-center" style={{ boxShadow: '0 2px 8px rgba(220,38,38,0.4)' }}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 2L8 9M5 6L8 2L11 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M3 12C3 10 5 8.5 8 8.5C11 8.5 13 10 13 12C13 13.5 11.5 14 8 14C4.5 14 3 13.5 3 12Z" stroke="white" strokeWidth="1.5"/>
@@ -192,10 +192,11 @@ export default function ResultsPage() {
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6 flex flex-col items-center">
+        <div className="w-full space-y-6">
 
         {/* Score + summary card */}
-        <div className="bg-[#2f2f2f] rounded-2xl border border-white/10 p-6">
+        <div className="glass rounded-2xl p-6">
           <div className="flex items-start gap-8">
             <ScoreGauge score={report.score} />
             <div className="flex-1">
@@ -241,8 +242,9 @@ export default function ResultsPage() {
         </div>
 
         {/* Source */}
-        <div className="text-xs text-[#8e8ea0]/60 pb-4">
+        <div className="text-xs text-[#8e8ea0]/60 pb-4 text-center">
           Source: {report.sourcesChecked.join(', ')}
+        </div>
         </div>
       </div>
     </main>
