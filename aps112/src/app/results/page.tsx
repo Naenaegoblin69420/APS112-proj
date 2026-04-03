@@ -72,7 +72,7 @@ function ClaimCard({ result }: { result: VerificationResult }) {
   const s = statusConfig[result.status];
 
   return (
-    <div className="glass-card rounded-xl overflow-hidden">
+    <div className="glass-card rounded-xl overflow-hidden border border-white/10">
       {/* Header row - increased padding */}
       <button
         onClick={() => setOpen(!open)}
@@ -182,11 +182,11 @@ function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
       {Array.from(bySource.entries()).map(([source, refs]) => (
         <div key={source}>
           <p className="text-sm font-medium text-white/80 mb-4 leading-tight">{source}</p>
-          <div className="space-y-3">
+          <div className="flex flex-col gap-4">
             {Array.from(refs.entries())
               .sort((a, b) => a[0].localeCompare(b[0]))
               .map(([sectionRef, { rule, statuses }]) => (
-                <div key={sectionRef} className="flex items-start gap-3 rounded-lg bg-white/5 px-4 py-3.5">
+                <div key={sectionRef} className="flex items-start gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-4">
                   <span className={`inline-block w-2 h-2 rounded-full ${statusDotColor(statuses)} shrink-0 mt-1.5`} />
                   <div className="min-w-0">
                     <p className="text-sm font-mono font-medium text-white">{sectionRef}</p>
@@ -290,14 +290,18 @@ export default function ResultsPage() {
           {/* Main content - Claims */}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-5">Claims Breakdown</h3>
-            <div className="space-y-5">
+            <div className="flex flex-col gap-6">
               {/* Show conflicts first, then unknowns, then verified */}
               {[...report.results]
                 .sort((a, b) => {
                   const order = { conflict: 0, unknown: 1, verified: 2 };
                   return order[a.status] - order[b.status];
                 })
-                .map(r => <ClaimCard key={r.claim.id} result={r} />)
+                .map(r => (
+                  <div key={r.claim.id}>
+                    <ClaimCard result={r} />
+                  </div>
+                ))
               }
             </div>
           </div>
