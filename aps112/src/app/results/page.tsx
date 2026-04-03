@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { VerificationReport, VerificationResult } from '@/types';
 
@@ -7,7 +7,7 @@ import { VerificationReport, VerificationResult } from '@/types';
 function ScoreGauge({ score }: { score: number }) {
   const r = 54;
   const cx = 70, cy = 70;
-  const circumference = Math.PI * r; // half-circle
+  const circumference = Math.PI * r;
   const progress = (score / 100) * circumference;
   const color = score >= 80 ? '#4ade80' : score >= 50 ? '#fbbf24' : '#f87171';
   const label = score >= 80 ? 'Compliant' : score >= 50 ? 'Review needed' : 'Non-compliant';
@@ -15,12 +15,10 @@ function ScoreGauge({ score }: { score: number }) {
   return (
     <div className="flex flex-col items-center">
       <svg width="140" height="80" viewBox="0 0 140 80">
-        {/* Track */}
         <path
           d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
           fill="none" stroke="#3f3f46" strokeWidth="10" strokeLinecap="round"
         />
-        {/* Progress */}
         <path
           d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
           fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"
@@ -41,6 +39,33 @@ function StatusDot({ status }: { status: VerificationResult['status'] }) {
     unknown: 'bg-amber-400',
   };
   return <span className={`inline-block w-2.5 h-2.5 rounded-full ${map[status]} shrink-0 mt-1.5`} />;
+}
+
+// Animated expandable content
+function ExpandableContent({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(isOpen ? contentRef.current.scrollHeight : 0);
+    }
+  }, [isOpen, children]);
+
+  return (
+    <div
+      style={{
+        height: isOpen ? height : 0,
+        overflow: 'hidden',
+        transition: 'height 0.3s ease, opacity 0.3s ease',
+        opacity: isOpen ? 1 : 0,
+      }}
+    >
+      <div ref={contentRef}>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function ClaimCard({ result }: { result: VerificationResult }) {
@@ -72,8 +97,8 @@ function ClaimCard({ result }: { result: VerificationResult }) {
   const s = statusConfig[result.status];
 
   return (
-    <div className="glass-card rounded-xl overflow-hidden border border-white/10">
-      {/* Header row - increased padding */}
+    <div className="rounded-xl overflow-hidden border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
+      {/* Header row */}
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-start gap-4 px-6 py-6 text-left hover:bg-white/5 transition-colors"
@@ -92,34 +117,40 @@ function ClaimCard({ result }: { result: VerificationResult }) {
             )}
           </div>
         </div>
-        <svg className={`w-4 h-4 text-[#8e8ea0] shrink-0 mt-1 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg 
+          className="w-4 h-4 text-[#8e8ea0] shrink-0 mt-1 transition-transform duration-300" 
+          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
-      {/* Expanded detail */}
-      {open && (
-        <div className="px-6 pb-6 border-t border-white/10">
-          <div className={`mt-5 rounded-lg border ${s.border} ${s.bg} px-5 py-4`}>
+      {/* Animated expanded detail */}
+      <ExpandableContent isOpen={open}>
+        <div className="px-8 pb-6 border-t border-white/10">
+          <div className={`mt-5 rounded-lg border ${s.border} ${s.bg} px-6 py-5`}>
             <p className={`text-sm ${s.text} leading-relaxed`}>{result.explanation}</p>
           </div>
 
           {(result.claimedValue || result.ruleValue) && (
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-lg glass-card px-4 py-3.5">
-                <p className="text-xs text-[#8e8ea0] mb-1.5">Claimed value</p>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div className="rounded-lg px-5 py-4 border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <p className="text-xs text-[#8e8ea0] mb-2">Claimed value</p>
                 <p className="text-sm font-medium text-white">{result.claimedValue ?? '—'}</p>
               </div>
-              <div className="rounded-lg glass-card px-4 py-3.5">
-                <p className="text-xs text-[#8e8ea0] mb-1.5">Rule value</p>
+              <div className="rounded-lg px-5 py-4 border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <p className="text-xs text-[#8e8ea0] mb-2">Rule value</p>
                 <p className="text-sm font-medium text-white">{result.ruleValue ?? '—'}</p>
               </div>
             </div>
           )}
 
           {result.matchedRule && (
-            <div className="mt-4 rounded-lg glass-card px-4 py-3.5">
-              <p className="text-xs text-[#8e8ea0] mb-1.5">Matched rule</p>
+            <div className="mt-4 rounded-lg px-5 py-4 border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <p className="text-xs text-[#8e8ea0] mb-2">Matched rule</p>
               <p className="text-sm text-gray-200">
                 <span className="font-mono text-xs bg-white/10 px-1.5 py-0.5 rounded mr-2">{result.matchedRule.id}</span>
                 {result.matchedRule.subject}
@@ -135,13 +166,12 @@ function ClaimCard({ result }: { result: VerificationResult }) {
             </span>
           </div>
         </div>
-      )}
+      </ExpandableContent>
     </div>
   );
 }
 
 function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
-  // Collect matched rules with their result status, deduplicated by sectionReference
   const refMap = new Map<string, { rule: NonNullable<VerificationResult['matchedRule']>; statuses: VerificationResult['status'][] }>();
   for (const r of results) {
     if (!r.matchedRule) continue;
@@ -153,7 +183,6 @@ function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
     }
   }
 
-  // Group by sourceDocument
   const bySource = new Map<string, typeof refMap>();
   for (const [key, val] of refMap) {
     const src = val.rule.sourceDocument;
@@ -169,14 +198,14 @@ function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
 
   if (refMap.size === 0) {
     return (
-      <div className="glass rounded-2xl p-6">
+      <div className="rounded-2xl p-6 border border-white/10 h-full" style={{ background: 'rgba(255,255,255,0.02)' }}>
         <p className="text-sm text-[#8e8ea0]/60">No specific sections matched.</p>
       </div>
     );
   }
 
   return (
-    <div className="glass rounded-2xl p-6 space-y-5">
+    <div className="rounded-2xl p-6 space-y-5 border border-white/10 h-full" style={{ background: 'rgba(255,255,255,0.02)' }}>
       {Array.from(bySource.entries()).map(([source, refs]) => (
         <div key={source}>
           <p className="text-sm font-medium text-white/80 mb-4 leading-tight">{source}</p>
@@ -184,7 +213,7 @@ function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
             {Array.from(refs.entries())
               .sort((a, b) => a[0].localeCompare(b[0]))
               .map(([sectionRef, { rule, statuses }]) => (
-                <div key={sectionRef} className="flex items-start gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-4">
+                <div key={sectionRef} className="flex items-start gap-3 rounded-lg bg-white/5 border border-white/10 px-5 py-4">
                   <span className={`inline-block w-2 h-2 rounded-full ${statusDotColor(statuses)} shrink-0 mt-1.5`} />
                   <div className="min-w-0">
                     <p className="text-sm font-mono font-medium text-white">{sectionRef}</p>
@@ -228,8 +257,8 @@ export default function ResultsPage() {
   return (
     <main className="min-h-screen" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #111111 70%, #000000 100%)' }}>
       {/* Header */}
-      <header className="glass-header px-6 py-4 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+      <header className="px-6 py-4 sticky top-0 z-10" style={{ background: 'rgba(10,10,10,0.8)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-red-600/80 flex items-center justify-center" style={{ boxShadow: '0 2px 8px rgba(220,38,38,0.4)' }}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -251,9 +280,9 @@ export default function ResultsPage() {
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        {/* Score + summary card - centered at top */}
-        <div className="glass rounded-2xl p-8 mb-10">
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        {/* Score + summary card - full width */}
+        <div className="rounded-2xl p-8 mb-10 border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
           <div className="flex flex-col md:flex-row items-center gap-8">
             <ScoreGauge score={report.score} />
             <div className="flex-1 text-center md:text-left">
@@ -283,29 +312,26 @@ export default function ResultsPage() {
           </div>
         </div>
 
-        {/* Two column layout for claims and references */}
-        <div className="flex flex-col lg:flex-row gap-10">
-          {/* Main content - Claims */}
+        {/* Two column layout - claims take more space */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main content - Claims - wider */}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-5">Claims Breakdown</h3>
-            <div className="flex flex-col gap-6">
-              {/* Show conflicts first, then unknowns, then verified */}
+            <div className="flex flex-col gap-5">
               {[...report.results]
                 .sort((a, b) => {
                   const order = { conflict: 0, unknown: 1, verified: 2 };
                   return order[a.status] - order[b.status];
                 })
                 .map(r => (
-                  <div key={r.claim.id}>
-                    <ClaimCard result={r} />
-                  </div>
+                  <ClaimCard key={r.claim.id} result={r} />
                 ))
               }
             </div>
           </div>
 
           {/* Right sidebar — OFC references */}
-          <div className="w-full lg:w-80 shrink-0">
+          <div className="w-full lg:w-[340px] shrink-0">
             <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-5">OFC References</h3>
             <div className="lg:sticky lg:top-24">
               <OFCReferenceSidebar results={report.results} />
