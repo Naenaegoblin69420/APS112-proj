@@ -76,7 +76,7 @@ function ClaimCard({ result }: { result: VerificationResult }) {
       {/* Header row */}
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-white/5 transition-colors"
+        className="w-full flex items-start gap-3 px-5 py-4 text-left hover:bg-white/5 transition-colors"
       >
         <StatusDot status={result.status} />
         <div className="flex-1 min-w-0">
@@ -99,8 +99,8 @@ function ClaimCard({ result }: { result: VerificationResult }) {
 
       {/* Expanded detail */}
       {open && (
-        <div className="px-4 pb-4 border-t border-white/10">
-          <div className={`mt-3 rounded-lg border ${s.border} ${s.bg} px-3 py-2.5`}>
+        <div className="px-5 pb-5 border-t border-white/10">
+          <div className={`mt-4 rounded-lg border ${s.border} ${s.bg} px-4 py-3`}>
             <p className={`text-sm ${s.text} leading-relaxed`}>{result.explanation}</p>
           </div>
 
@@ -293,7 +293,7 @@ export default function ResultsPage() {
           {/* Claim cards */}
           <div>
             <h3 className="text-sm font-semibold text-[#8e8ea0] mb-3">Claims breakdown</h3>
-            <div className="space-y-2">
+            <div className="space-y-4">
               {/* Show conflicts first, then unknowns, then verified */}
               {[...report.results]
                 .sort((a, b) => {
