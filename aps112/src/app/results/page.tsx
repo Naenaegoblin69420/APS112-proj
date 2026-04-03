@@ -1,9 +1,8 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { VerificationReport, VerificationResult } from '@/types';
 
-// SVG arc score gauge
 function ScoreGauge({ score }: { score: number }) {
   const r = 54;
   const cx = 70, cy = 70;
@@ -13,7 +12,7 @@ function ScoreGauge({ score }: { score: number }) {
   const label = score >= 80 ? 'Compliant' : score >= 50 ? 'Review needed' : 'Non-compliant';
 
   return (
-    <div className="flex flex-col items-center">
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <svg width="140" height="80" viewBox="0 0 140 80">
         <path
           d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
@@ -26,45 +25,24 @@ function ScoreGauge({ score }: { score: number }) {
           style={{ transition: 'stroke-dasharray 0.8s ease' }}
         />
       </svg>
-      <p className="text-4xl font-bold mt-[-12px]" style={{ color }}>{score}</p>
-      <p className="text-xs font-medium mt-1" style={{ color }}>{label}</p>
+      <p style={{ fontSize: '36px', fontWeight: 'bold', marginTop: '-12px', color }}>{score}</p>
+      <p style={{ fontSize: '12px', fontWeight: 500, marginTop: '4px', color }}>{label}</p>
     </div>
   );
 }
 
 function StatusDot({ status }: { status: VerificationResult['status'] }) {
-  const map = {
-    verified: 'bg-green-400',
-    conflict: 'bg-red-400',
-    unknown: 'bg-amber-400',
-  };
-  return <span className={`inline-block w-2.5 h-2.5 rounded-full ${map[status]} shrink-0 mt-1.5`} />;
-}
-
-// Animated expandable content
-function ExpandableContent({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setHeight(isOpen ? contentRef.current.scrollHeight : 0);
-    }
-  }, [isOpen, children]);
-
+  const colors = { verified: '#4ade80', conflict: '#f87171', unknown: '#fbbf24' };
   return (
-    <div
-      style={{
-        height: isOpen ? height : 0,
-        overflow: 'hidden',
-        transition: 'height 0.3s ease, opacity 0.3s ease',
-        opacity: isOpen ? 1 : 0,
-      }}
-    >
-      <div ref={contentRef}>
-        {children}
-      </div>
-    </div>
+    <span style={{
+      display: 'inline-block',
+      width: '10px',
+      height: '10px',
+      borderRadius: '50%',
+      background: colors[status],
+      flexShrink: 0,
+      marginTop: '6px'
+    }} />
   );
 }
 
@@ -72,101 +50,125 @@ function ClaimCard({ result }: { result: VerificationResult }) {
   const [open, setOpen] = useState(result.status === 'conflict');
 
   const statusConfig = {
-    verified: {
-      bg: 'bg-green-950/40',
-      border: 'border-green-800/60',
-      text: 'text-green-300',
-      badge: 'bg-green-900/60 text-green-400',
-      label: 'Verified',
-    },
-    conflict: {
-      bg: 'bg-red-950/40',
-      border: 'border-red-800/60',
-      text: 'text-red-300',
-      badge: 'bg-red-900/60 text-red-400',
-      label: 'Conflict',
-    },
-    unknown: {
-      bg: 'bg-amber-950/40',
-      border: 'border-amber-800/60',
-      text: 'text-amber-300',
-      badge: 'bg-amber-900/60 text-amber-400',
-      label: 'Unknown',
-    },
+    verified: { bg: 'rgba(22, 101, 52, 0.4)', border: 'rgba(22, 101, 52, 0.6)', text: '#86efac', badgeBg: 'rgba(22, 101, 52, 0.6)', badgeText: '#4ade80', label: 'Verified' },
+    conflict: { bg: 'rgba(127, 29, 29, 0.4)', border: 'rgba(127, 29, 29, 0.6)', text: '#fca5a5', badgeBg: 'rgba(127, 29, 29, 0.6)', badgeText: '#f87171', label: 'Conflict' },
+    unknown: { bg: 'rgba(120, 53, 15, 0.4)', border: 'rgba(120, 53, 15, 0.6)', text: '#fcd34d', badgeBg: 'rgba(120, 53, 15, 0.6)', badgeText: '#fbbf24', label: 'Unknown' },
   };
   const s = statusConfig[result.status];
 
   return (
-    <div className="rounded-xl overflow-hidden border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
-      {/* Header row */}
+    <div style={{
+      borderRadius: '12px',
+      overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.1)',
+      background: 'rgba(255,255,255,0.02)'
+    }}>
+      {/* Header */}
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-start gap-4 px-6 py-6 text-left hover:bg-white/5 transition-colors"
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '16px',
+          padding: '24px 28px',
+          textAlign: 'left',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'background 0.2s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       >
         <StatusDot status={result.status} />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-200 leading-relaxed mb-4">"{result.claim.originalText}"</p>
-          <div className="flex flex-wrap gap-2.5">
-            <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${s.badge}`}>{s.label}</span>
-            <span className="text-xs px-3 py-1.5 rounded-full bg-blue-900/50 text-blue-300">{result.claim.subject}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: '14px', color: '#e5e5e5', lineHeight: 1.6, marginBottom: '14px' }}>"{result.claim.originalText}"</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+            <span style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '9999px', fontWeight: 500, background: s.badgeBg, color: s.badgeText }}>{s.label}</span>
+            <span style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '9999px', background: 'rgba(30, 58, 138, 0.5)', color: '#93c5fd' }}>{result.claim.subject}</span>
             {result.matchedRule && (
-              <span className="text-xs px-3 py-1.5 rounded-full bg-white/10 text-gray-400 font-mono">{result.matchedRule.sectionReference}</span>
+              <span style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '9999px', background: 'rgba(255,255,255,0.1)', color: '#9ca3af', fontFamily: 'monospace' }}>{result.matchedRule.sectionReference}</span>
             )}
             {result.matchedRule?.severity === 'Critical' && (
-              <span className="text-xs px-3 py-1.5 rounded-full bg-red-900/60 text-red-400 font-medium">Critical</span>
+              <span style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '9999px', fontWeight: 500, background: 'rgba(127, 29, 29, 0.6)', color: '#f87171' }}>Critical</span>
             )}
           </div>
         </div>
-        <svg 
-          className="w-4 h-4 text-[#8e8ea0] shrink-0 mt-1 transition-transform duration-300" 
-          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
+        <svg
+          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8e8ea0" strokeWidth="2"
+          style={{
+            flexShrink: 0,
+            marginTop: '4px',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.3s ease'
+          }}
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
-      {/* Animated expanded detail */}
-      <ExpandableContent isOpen={open}>
-        <div className="px-8 pb-6 border-t border-white/10">
-          <div className={`mt-5 rounded-lg border ${s.border} ${s.bg} px-6 py-5`}>
-            <p className={`text-sm ${s.text} leading-relaxed`}>{result.explanation}</p>
+      {/* Expandable content with animation */}
+      <div style={{
+        maxHeight: open ? '1000px' : '0',
+        overflow: 'hidden',
+        transition: 'max-height 0.4s ease, opacity 0.3s ease',
+        opacity: open ? 1 : 0,
+      }}>
+        <div style={{
+          padding: '0 32px 28px 32px',
+          borderTop: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          {/* Explanation box */}
+          <div style={{
+            marginTop: '20px',
+            borderRadius: '8px',
+            border: `1px solid ${s.border}`,
+            background: s.bg,
+            padding: '20px 24px'
+          }}>
+            <p style={{ fontSize: '14px', color: s.text, lineHeight: 1.6 }}>{result.explanation}</p>
           </div>
 
+          {/* Claimed vs Rule values */}
           {(result.claimedValue || result.ruleValue) && (
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div className="rounded-lg px-5 py-4 border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <p className="text-xs text-[#8e8ea0] mb-2">Claimed value</p>
-                <p className="text-sm font-medium text-white">{result.claimedValue ?? '—'}</p>
+            <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ borderRadius: '8px', padding: '16px 20px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+                <p style={{ fontSize: '12px', color: '#8e8ea0', marginBottom: '8px' }}>Claimed value</p>
+                <p style={{ fontSize: '14px', fontWeight: 500, color: 'white' }}>{result.claimedValue ?? '—'}</p>
               </div>
-              <div className="rounded-lg px-5 py-4 border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <p className="text-xs text-[#8e8ea0] mb-2">Rule value</p>
-                <p className="text-sm font-medium text-white">{result.ruleValue ?? '—'}</p>
+              <div style={{ borderRadius: '8px', padding: '16px 20px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+                <p style={{ fontSize: '12px', color: '#8e8ea0', marginBottom: '8px' }}>Rule value</p>
+                <p style={{ fontSize: '14px', fontWeight: 500, color: 'white' }}>{result.ruleValue ?? '—'}</p>
               </div>
             </div>
           )}
 
+          {/* Matched rule */}
           {result.matchedRule && (
-            <div className="mt-4 rounded-lg px-5 py-4 border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
-              <p className="text-xs text-[#8e8ea0] mb-2">Matched rule</p>
-              <p className="text-sm text-gray-200">
-                <span className="font-mono text-xs bg-white/10 px-1.5 py-0.5 rounded mr-2">{result.matchedRule.id}</span>
+            <div style={{ marginTop: '16px', borderRadius: '8px', padding: '16px 20px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+              <p style={{ fontSize: '12px', color: '#8e8ea0', marginBottom: '8px' }}>Matched rule</p>
+              <p style={{ fontSize: '14px', color: '#e5e5e5' }}>
+                <span style={{ fontFamily: 'monospace', fontSize: '12px', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px', marginRight: '8px' }}>{result.matchedRule.id}</span>
                 {result.matchedRule.subject}
               </p>
-              <p className="text-xs text-[#8e8ea0] mt-2 leading-relaxed">{result.matchedRule.value}</p>
+              <p style={{ fontSize: '12px', color: '#8e8ea0', marginTop: '8px', lineHeight: 1.6 }}>{result.matchedRule.value}</p>
             </div>
           )}
 
-          <div className="flex items-center gap-2 mt-4">
-            <span className="text-xs text-[#8e8ea0]">AI confidence:</span>
-            <span className={`text-xs font-medium ${result.confidence === 'High' ? 'text-green-400' : result.confidence === 'Medium' ? 'text-amber-400' : 'text-red-400'}`}>
+          {/* AI confidence */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+            <span style={{ fontSize: '12px', color: '#8e8ea0' }}>AI confidence:</span>
+            <span style={{
+              fontSize: '12px',
+              fontWeight: 500,
+              color: result.confidence === 'High' ? '#4ade80' : result.confidence === 'Medium' ? '#fbbf24' : '#f87171'
+            }}>
               {result.confidence}
             </span>
           </div>
         </div>
-      </ExpandableContent>
+      </div>
     </div>
   );
 }
@@ -191,33 +193,49 @@ function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
   }
 
   const statusDotColor = (statuses: VerificationResult['status'][]) => {
-    if (statuses.includes('conflict')) return 'bg-red-400';
-    if (statuses.includes('unknown')) return 'bg-amber-400';
-    return 'bg-green-400';
+    if (statuses.includes('conflict')) return '#f87171';
+    if (statuses.includes('unknown')) return '#fbbf24';
+    return '#4ade80';
   };
 
   if (refMap.size === 0) {
     return (
-      <div className="rounded-2xl p-6 border border-white/10 h-full" style={{ background: 'rgba(255,255,255,0.02)' }}>
-        <p className="text-sm text-[#8e8ea0]/60">No specific sections matched.</p>
+      <div style={{ borderRadius: '16px', padding: '24px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+        <p style={{ fontSize: '14px', color: 'rgba(142,142,160,0.6)' }}>No specific sections matched.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl p-6 space-y-5 border border-white/10 h-full" style={{ background: 'rgba(255,255,255,0.02)' }}>
+    <div style={{ borderRadius: '16px', padding: '24px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
       {Array.from(bySource.entries()).map(([source, refs]) => (
-        <div key={source}>
-          <p className="text-sm font-medium text-white/80 mb-4 leading-tight">{source}</p>
-          <div className="flex flex-col gap-4">
+        <div key={source} style={{ marginBottom: '20px' }}>
+          <p style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginBottom: '16px' }}>{source}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {Array.from(refs.entries())
               .sort((a, b) => a[0].localeCompare(b[0]))
               .map(([sectionRef, { rule, statuses }]) => (
-                <div key={sectionRef} className="flex items-start gap-3 rounded-lg bg-white/5 border border-white/10 px-5 py-4">
-                  <span className={`inline-block w-2 h-2 rounded-full ${statusDotColor(statuses)} shrink-0 mt-1.5`} />
-                  <div className="min-w-0">
-                    <p className="text-sm font-mono font-medium text-white">{sectionRef}</p>
-                    <p className="text-sm text-[#8e8ea0] mt-1.5 leading-snug">{rule.subject}</p>
+                <div key={sectionRef} style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px',
+                  borderRadius: '8px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  padding: '16px 20px'
+                }}>
+                  <span style={{
+                    display: 'inline-block',
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: statusDotColor(statuses),
+                    flexShrink: 0,
+                    marginTop: '6px'
+                  }} />
+                  <div>
+                    <p style={{ fontSize: '14px', fontFamily: 'monospace', fontWeight: 500, color: 'white' }}>{sectionRef}</p>
+                    <p style={{ fontSize: '13px', color: '#8e8ea0', marginTop: '6px', lineHeight: 1.5 }}>{rule.subject}</p>
                   </div>
                 </div>
               ))}
@@ -240,14 +258,15 @@ export default function ResultsPage() {
 
   if (!report) {
     return (
-      <main className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #111111 70%, #000000 100%)' }}>
-        <div className="flex items-center gap-2 text-[#8e8ea0]">
-          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+      <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #111111 70%, #000000 100%)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#8e8ea0' }}>
+          <svg style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} fill="none" viewBox="0 0 24 24">
+            <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
           </svg>
           Loading…
         </div>
+        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </main>
     );
   }
@@ -255,92 +274,94 @@ export default function ResultsPage() {
   const checkedAt = new Date(report.checkedAt).toLocaleString();
 
   return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #111111 70%, #000000 100%)' }}>
+    <main style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #111111 70%, #000000 100%)' }}>
       {/* Header */}
-      <header className="px-6 py-4 sticky top-0 z-10" style={{ background: 'rgba(10,10,10,0.8)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-red-600/80 flex items-center justify-center" style={{ boxShadow: '0 2px 8px rgba(220,38,38,0.4)' }}>
+      <header style={{ padding: '16px 24px', position: 'sticky', top: 0, zIndex: 10, background: 'rgba(10,10,10,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(220, 38, 38, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(220,38,38,0.4)' }}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 2L8 9M5 6L8 2L11 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M3 12C3 10 5 8.5 8 8.5C11 8.5 13 10 13 12C13 13.5 11.5 14 8 14C4.5 14 3 13.5 3 12Z" stroke="white" strokeWidth="1.5"/>
               </svg>
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-white leading-none">OFC Compliance Checker</h1>
-              <p className="text-xs text-[#8e8ea0] mt-0.5">Verification results</p>
+              <h1 style={{ fontSize: '14px', fontWeight: 600, color: 'white', lineHeight: 1 }}>OFC Compliance Checker</h1>
+              <p style={{ fontSize: '12px', color: '#8e8ea0', marginTop: '2px' }}>Verification results</p>
             </div>
           </div>
           <button
             onClick={() => router.push('/')}
-            className="text-sm text-[#8e8ea0] hover:text-white flex items-center gap-1.5 transition-colors"
+            style={{ fontSize: '14px', color: '#8e8ea0', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'color 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'white'}
+            onMouseLeave={e => e.currentTarget.style.color = '#8e8ea0'}
           >
             ← New analysis
           </button>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        {/* Score + summary card - full width */}
-        <div className="rounded-2xl p-8 mb-10 border border-white/10" style={{ background: 'rgba(255,255,255,0.02)' }}>
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <ScoreGauge score={report.score} />
-            <div className="flex-1 text-center md:text-left">
-              <h2 className="text-lg font-semibold text-white mb-2">Compliance Score</h2>
-              <p className="text-sm text-[#8e8ea0] mb-5">{report.results.length} claims checked · {checkedAt}</p>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: 'Verified', count: report.verifiedCount, color: 'text-green-400', bg: 'bg-green-950/40 border-green-800/60' },
-                  { label: 'Conflicts', count: report.conflictCount, color: 'text-red-400', bg: 'bg-red-950/40 border-red-800/60' },
-                  { label: 'Unknown', count: report.unknownCount, color: 'text-amber-400', bg: 'bg-amber-950/40 border-amber-800/60' },
-                ].map(s => (
-                  <div key={s.label} className={`rounded-xl border px-4 py-4 ${s.bg}`}>
-                    <p className={`text-3xl font-bold ${s.color}`}>{s.count}</p>
-                    <p className="text-xs text-[#8e8ea0] mt-1">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-              {report.criticalConflicts > 0 && (
-                <div className="mt-4 flex items-center justify-center md:justify-start gap-2 rounded-lg bg-red-950/50 border border-red-800/60 px-4 py-3">
-                  <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
-                  </svg>
-                  <p className="text-sm font-medium text-red-300">{report.criticalConflicts} critical conflict{report.criticalConflicts !== 1 ? 's' : ''} detected</p>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 24px' }}>
+        {/* Score card */}
+        <div style={{ borderRadius: '16px', padding: '32px', marginBottom: '40px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '32px', width: '100%' }}>
+              <ScoreGauge score={report.score} />
+              <div style={{ flex: 1 }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>Compliance Score</h2>
+                <p style={{ fontSize: '14px', color: '#8e8ea0', marginBottom: '20px' }}>{report.results.length} claims checked · {checkedAt}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                  {[
+                    { label: 'Verified', count: report.verifiedCount, color: '#4ade80', bg: 'rgba(22, 101, 52, 0.4)', border: 'rgba(22, 101, 52, 0.6)' },
+                    { label: 'Conflicts', count: report.conflictCount, color: '#f87171', bg: 'rgba(127, 29, 29, 0.4)', border: 'rgba(127, 29, 29, 0.6)' },
+                    { label: 'Unknown', count: report.unknownCount, color: '#fbbf24', bg: 'rgba(120, 53, 15, 0.4)', border: 'rgba(120, 53, 15, 0.6)' },
+                  ].map(s => (
+                    <div key={s.label} style={{ borderRadius: '12px', border: `1px solid ${s.border}`, background: s.bg, padding: '16px' }}>
+                      <p style={{ fontSize: '28px', fontWeight: 'bold', color: s.color }}>{s.count}</p>
+                      <p style={{ fontSize: '12px', color: '#8e8ea0', marginTop: '4px' }}>{s.label}</p>
+                    </div>
+                  ))}
                 </div>
-              )}
+                {report.criticalConflicts > 0 && (
+                  <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '8px', background: 'rgba(127, 29, 29, 0.5)', border: '1px solid rgba(127, 29, 29, 0.6)', padding: '12px 16px' }}>
+                    <svg style={{ width: '16px', height: '16px', color: '#f87171' }} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                    </svg>
+                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#fca5a5' }}>{report.criticalConflicts} critical conflict{report.criticalConflicts !== 1 ? 's' : ''} detected</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Two column layout - claims take more space */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main content - Claims - wider */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-5">Claims Breakdown</h3>
-            <div className="flex flex-col gap-5">
+        {/* Two column layout */}
+        <div style={{ display: 'flex', gap: '32px' }}>
+          {/* Claims - wider */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#8e8ea0', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '20px' }}>Claims Breakdown</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {[...report.results]
                 .sort((a, b) => {
                   const order = { conflict: 0, unknown: 1, verified: 2 };
                   return order[a.status] - order[b.status];
                 })
-                .map(r => (
-                  <ClaimCard key={r.claim.id} result={r} />
-                ))
+                .map(r => <ClaimCard key={r.claim.id} result={r} />)
               }
             </div>
           </div>
 
-          {/* Right sidebar — OFC references */}
-          <div className="w-full lg:w-[340px] shrink-0">
-            <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-5">OFC References</h3>
-            <div className="lg:sticky lg:top-24">
+          {/* Sidebar */}
+          <div style={{ width: '340px', flexShrink: 0 }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#8e8ea0', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '20px' }}>OFC References</h3>
+            <div style={{ position: 'sticky', top: '96px' }}>
               <OFCReferenceSidebar results={report.results} />
             </div>
           </div>
         </div>
 
-        {/* Source footer */}
-        <div className="text-xs text-[#8e8ea0]/60 pt-10 pb-6 text-center">
+        {/* Footer */}
+        <div style={{ fontSize: '12px', color: 'rgba(142,142,160,0.6)', paddingTop: '40px', paddingBottom: '24px', textAlign: 'center' }}>
           Source: {report.sourcesChecked.join(', ')}
         </div>
       </div>
