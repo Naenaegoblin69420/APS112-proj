@@ -73,22 +73,22 @@ function ClaimCard({ result }: { result: VerificationResult }) {
 
   return (
     <div className="glass-card rounded-xl overflow-hidden">
-      {/* Header row */}
+      {/* Header row - increased padding */}
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-start gap-4 px-6 py-5 text-left hover:bg-white/5 transition-colors"
+        className="w-full flex items-start gap-4 px-6 py-6 text-left hover:bg-white/5 transition-colors"
       >
         <StatusDot status={result.status} />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-200 leading-relaxed">"{result.claim.originalText}"</p>
-          <div className="flex flex-wrap gap-2 mt-3">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${s.badge}`}>{s.label}</span>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-blue-900/50 text-blue-300">{result.claim.subject}</span>
+          <p className="text-sm text-gray-200 leading-relaxed mb-4">"{result.claim.originalText}"</p>
+          <div className="flex flex-wrap gap-2.5">
+            <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${s.badge}`}>{s.label}</span>
+            <span className="text-xs px-3 py-1.5 rounded-full bg-blue-900/50 text-blue-300">{result.claim.subject}</span>
             {result.matchedRule && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-gray-400 font-mono">{result.matchedRule.sectionReference}</span>
+              <span className="text-xs px-3 py-1.5 rounded-full bg-white/10 text-gray-400 font-mono">{result.matchedRule.sectionReference}</span>
             )}
             {result.matchedRule?.severity === 'Critical' && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-red-900/60 text-red-400 font-medium">Critical</span>
+              <span className="text-xs px-3 py-1.5 rounded-full bg-red-900/60 text-red-400 font-medium">Critical</span>
             )}
           </div>
         </div>
@@ -106,11 +106,11 @@ function ClaimCard({ result }: { result: VerificationResult }) {
 
           {(result.claimedValue || result.ruleValue) && (
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-lg glass-card px-4 py-3">
+              <div className="rounded-lg glass-card px-4 py-3.5">
                 <p className="text-xs text-[#8e8ea0] mb-1.5">Claimed value</p>
                 <p className="text-sm font-medium text-white">{result.claimedValue ?? '—'}</p>
               </div>
-              <div className="rounded-lg glass-card px-4 py-3">
+              <div className="rounded-lg glass-card px-4 py-3.5">
                 <p className="text-xs text-[#8e8ea0] mb-1.5">Rule value</p>
                 <p className="text-sm font-medium text-white">{result.ruleValue ?? '—'}</p>
               </div>
@@ -118,7 +118,7 @@ function ClaimCard({ result }: { result: VerificationResult }) {
           )}
 
           {result.matchedRule && (
-            <div className="mt-4 rounded-lg glass-card px-4 py-3">
+            <div className="mt-4 rounded-lg glass-card px-4 py-3.5">
               <p className="text-xs text-[#8e8ea0] mb-1.5">Matched rule</p>
               <p className="text-sm text-gray-200">
                 <span className="font-mono text-xs bg-white/10 px-1.5 py-0.5 rounded mr-2">{result.matchedRule.id}</span>
@@ -169,28 +169,28 @@ function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
 
   if (refMap.size === 0) {
     return (
-      <div className="glass rounded-2xl p-5">
+      <div className="glass rounded-2xl p-6">
         <h3 className="text-xs font-semibold text-[#8e8ea0] uppercase tracking-wider mb-4">OFC References</h3>
-        <p className="text-xs text-[#8e8ea0]/60">No specific sections matched.</p>
+        <p className="text-sm text-[#8e8ea0]/60">No specific sections matched.</p>
       </div>
     );
   }
 
   return (
-    <div className="glass rounded-2xl p-5 space-y-5">
+    <div className="glass rounded-2xl p-6 space-y-5">
       <h3 className="text-xs font-semibold text-[#8e8ea0] uppercase tracking-wider">OFC References</h3>
       {Array.from(bySource.entries()).map(([source, refs]) => (
         <div key={source}>
-          <p className="text-xs font-medium text-white/70 mb-3 leading-tight">{source}</p>
-          <div className="space-y-2">
+          <p className="text-sm font-medium text-white/80 mb-4 leading-tight">{source}</p>
+          <div className="space-y-3">
             {Array.from(refs.entries())
               .sort((a, b) => a[0].localeCompare(b[0]))
               .map(([sectionRef, { rule, statuses }]) => (
-                <div key={sectionRef} className="flex items-start gap-3 rounded-lg bg-white/5 px-3 py-2.5">
+                <div key={sectionRef} className="flex items-start gap-3 rounded-lg bg-white/5 px-4 py-3.5">
                   <span className={`inline-block w-2 h-2 rounded-full ${statusDotColor(statuses)} shrink-0 mt-1.5`} />
                   <div className="min-w-0">
-                    <p className="text-xs font-mono font-medium text-white">{sectionRef}</p>
-                    <p className="text-xs text-[#8e8ea0] mt-1 leading-snug">{rule.subject}</p>
+                    <p className="text-sm font-mono font-medium text-white">{sectionRef}</p>
+                    <p className="text-sm text-[#8e8ea0] mt-1.5 leading-snug">{rule.subject}</p>
                   </div>
                 </div>
               ))}
@@ -255,7 +255,7 @@ export default function ResultsPage() {
 
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Score + summary card - centered at top */}
-        <div className="glass rounded-2xl p-8 mb-8">
+        <div className="glass rounded-2xl p-8 mb-10">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <ScoreGauge score={report.score} />
             <div className="flex-1 text-center md:text-left">
@@ -289,8 +289,8 @@ export default function ResultsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main content - Claims */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-4">Claims Breakdown</h3>
-            <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-5">Claims Breakdown</h3>
+            <div className="space-y-5">
               {/* Show conflicts first, then unknowns, then verified */}
               {[...report.results]
                 .sort((a, b) => {
@@ -302,8 +302,8 @@ export default function ResultsPage() {
             </div>
           </div>
 
-          {/* Right sidebar — OFC references */}
-          <div className="w-full lg:w-72 shrink-0">
+          {/* Right sidebar — OFC references - now wider */}
+          <div className="w-full lg:w-80 shrink-0">
             <div className="lg:sticky lg:top-24">
               <OFCReferenceSidebar results={report.results} />
             </div>
