@@ -72,7 +72,7 @@ export default function HomePage() {
           <div style={{ marginBottom: '40px', textAlign: 'center' }}>
             <h2 style={{ fontSize: '30px', fontWeight: 600, color: 'white', marginBottom: '12px' }}>Verify fire code compliance</h2>
             <p style={{ color: '#8e8ea0', fontSize: '14px', lineHeight: 1.6 }}>
-              Paste text containing Ontario Fire Code claims. We'll check each one against 272 indexed rules.
+              Paste text containing Ontario Fire Code claims. We'll check each one against our indexed rules.
             </p>
           </div>
 
@@ -92,10 +92,11 @@ export default function HomePage() {
                   padding: '20px',
                   fontSize: '14px',
                   color: 'white',
-                  resize: 'vertical',
+                  resize: 'none',
                   lineHeight: 1.7,
                   outline: 'none',
                   opacity: loading ? 0.6 : 1,
+                  overflow: 'hidden',
                 }}
                 className="placeholder-[#6b6b7b] focus:border-white/20"
               />
@@ -122,7 +123,7 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* Centered button - using inline styles for guaranteed styling */}
+            {/* Centered button */}
             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '8px' }}>
               <button
                 type="submit"
