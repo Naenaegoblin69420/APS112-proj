@@ -11,6 +11,8 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const isDisabled = loading || text.trim().length < 20;
+
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     if (text.trim().length < 20) { setError('Please enter at least 20 characters.'); return; }
@@ -53,13 +55,13 @@ export default function HomePage() {
       {/* Header - minimal */}
       <header className="px-6 py-5">
         <div className="max-w-2xl mx-auto flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-red-600/80 flex items-center justify-center" style={{ boxShadow: '0 2px 8px rgba(220,38,38,0.3)' }}>
+          <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: 'rgba(220, 38, 38, 0.8)', boxShadow: '0 2px 8px rgba(220,38,38,0.3)' }}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path d="M8 2L8 9M5 6L8 2L11 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M3 12C3 10 5 8.5 8 8.5C11 8.5 13 10 13 12C13 13.5 11.5 14 8 14C4.5 14 3 13.5 3 12Z" stroke="white" strokeWidth="1.5"/>
             </svg>
           </div>
-          <span className="text-sm font-medium text-white">OFC Compliance Checker</span>
+          <span style={{ fontSize: '14px', fontWeight: 500, color: 'white' }}>OFC Compliance Checker</span>
         </div>
       </header>
 
@@ -67,50 +69,87 @@ export default function HomePage() {
       <div className="flex-1 flex items-center justify-center px-6 pb-16">
         <div className="w-full max-w-xl">
           {/* Title */}
-          <div className="mb-10 text-center">
-            <h2 className="text-3xl font-semibold text-white mb-3">Verify fire code compliance</h2>
-            <p className="text-[#8e8ea0] text-sm leading-relaxed">
+          <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '30px', fontWeight: 600, color: 'white', marginBottom: '12px' }}>Verify fire code compliance</h2>
+            <p style={{ color: '#8e8ea0', fontSize: '14px', lineHeight: 1.6 }}>
               Paste text containing Ontario Fire Code claims. We'll check each one against 272 indexed rules.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="relative">
+          <form onSubmit={handleSubmit}>
+            <div style={{ position: 'relative', marginBottom: '20px' }}>
               <textarea
                 value={text}
                 onChange={e => { setText(e.target.value); setError(''); }}
                 placeholder={EXAMPLE}
                 rows={7}
                 disabled={loading}
-                className="glass-input w-full rounded-xl px-5 py-5 text-sm text-white placeholder-[#6b6b7b] resize-y disabled:opacity-60 leading-relaxed"
+                style={{
+                  width: '100%',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  fontSize: '14px',
+                  color: 'white',
+                  resize: 'vertical',
+                  lineHeight: 1.7,
+                  outline: 'none',
+                  opacity: loading ? 0.6 : 1,
+                }}
+                className="placeholder-[#6b6b7b] focus:border-white/20"
               />
               {text.length > 0 && (
-                <span className="absolute bottom-4 right-4 text-xs text-[#6b6b7b]">{text.length}</span>
+                <span style={{ position: 'absolute', bottom: '16px', right: '16px', fontSize: '12px', color: '#6b6b7b' }}>{text.length}</span>
               )}
             </div>
 
             {error && (
-              <div className="flex items-start gap-3 rounded-xl bg-red-950/40 border border-red-800/40 px-4 py-4">
-                <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'flex-start', 
+                gap: '12px', 
+                borderRadius: '12px', 
+                background: 'rgba(127, 29, 29, 0.4)', 
+                border: '1px solid rgba(153, 27, 27, 0.4)', 
+                padding: '16px',
+                marginBottom: '20px'
+              }}>
+                <svg style={{ width: '16px', height: '16px', color: '#f87171', marginTop: '2px', flexShrink: 0 }} fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
                 </svg>
-                <p className="text-sm text-red-300">{error}</p>
+                <p style={{ fontSize: '14px', color: '#fca5a5' }}>{error}</p>
               </div>
             )}
 
-            {/* Centered button */}
-            <div className="flex justify-center pt-2">
+            {/* Centered button - using inline styles for guaranteed styling */}
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '8px' }}>
               <button
                 type="submit"
-                disabled={loading || text.trim().length < 20}
-                className="flex items-center gap-2 rounded-lg bg-white/90 hover:bg-white disabled:bg-white/10 disabled:text-white/30 disabled:cursor-not-allowed text-[#111] text-sm font-medium px-6 py-3 transition-all"
-                style={{ boxShadow: loading || text.trim().length < 20 ? 'none' : '0 2px 12px rgba(255,255,255,0.15)' }}
+                disabled={isDisabled}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  borderRadius: '8px',
+                  background: isDisabled ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.95)',
+                  color: isDisabled ? 'rgba(255,255,255,0.3)' : '#111',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  padding: '12px 24px',
+                  border: 'none',
+                  cursor: isDisabled ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: isDisabled ? 'none' : '0 2px 12px rgba(255,255,255,0.15)',
+                }}
+                onMouseEnter={e => { if (!isDisabled) e.currentTarget.style.background = 'white'; }}
+                onMouseLeave={e => { if (!isDisabled) e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; }}
               >
                 {loading ? (
                   <>
-                    <svg className="w-4 h-4 animate-spin text-gray-500" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    <svg style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} fill="none" viewBox="0 0 24 24">
+                      <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
                     {stage}
                   </>
@@ -124,15 +163,33 @@ export default function HomePage() {
       </div>
 
       {/* Subtle try example - bottom left */}
-      <div className="fixed bottom-4 left-4">
-        <button
-          type="button"
-          onClick={() => { setText(EXAMPLE); setError(''); }}
-          className="text-xs text-[#4a4a4a] hover:text-[#6b6b7b] transition-colors"
-        >
-          try example
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => { setText(EXAMPLE); setError(''); }}
+        style={{
+          position: 'fixed',
+          bottom: '16px',
+          left: '16px',
+          fontSize: '12px',
+          color: '#3a3a3a',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'color 0.2s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.color = '#6b6b7b'}
+        onMouseLeave={e => e.currentTarget.style.color = '#3a3a3a'}
+      >
+        try example
+      </button>
+
+      {/* Keyframe for spinner */}
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </main>
   );
 }

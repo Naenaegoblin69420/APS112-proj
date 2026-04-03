@@ -170,7 +170,6 @@ function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
   if (refMap.size === 0) {
     return (
       <div className="glass rounded-2xl p-6">
-        <h3 className="text-xs font-semibold text-[#8e8ea0] uppercase tracking-wider mb-4">OFC References</h3>
         <p className="text-sm text-[#8e8ea0]/60">No specific sections matched.</p>
       </div>
     );
@@ -178,7 +177,6 @@ function OFCReferenceSidebar({ results }: { results: VerificationResult[] }) {
 
   return (
     <div className="glass rounded-2xl p-6 space-y-5">
-      <h3 className="text-xs font-semibold text-[#8e8ea0] uppercase tracking-wider">OFC References</h3>
       {Array.from(bySource.entries()).map(([source, refs]) => (
         <div key={source}>
           <p className="text-sm font-medium text-white/80 mb-4 leading-tight">{source}</p>
@@ -286,7 +284,7 @@ export default function ResultsPage() {
         </div>
 
         {/* Two column layout for claims and references */}
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-10">
           {/* Main content - Claims */}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-5">Claims Breakdown</h3>
@@ -306,8 +304,9 @@ export default function ResultsPage() {
             </div>
           </div>
 
-          {/* Right sidebar — OFC references - now wider */}
+          {/* Right sidebar — OFC references */}
           <div className="w-full lg:w-80 shrink-0">
+            <h3 className="text-sm font-semibold text-[#8e8ea0] uppercase tracking-wider mb-5">OFC References</h3>
             <div className="lg:sticky lg:top-24">
               <OFCReferenceSidebar results={report.results} />
             </div>
