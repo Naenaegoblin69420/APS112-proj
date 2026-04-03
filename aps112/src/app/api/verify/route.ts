@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { geminiPro } from '@/lib/gemini';
 import { findCandidates } from '@/lib/matcher';
-import { getAllRules } from '@/lib/rules';
+import { getRuleById } from '@/lib/rules';
 import { detectValueMismatch } from '@/lib/mismatch';
 import { ExtractedClaim, VerificationResult, VerificationReport } from '@/types';
 
@@ -49,15 +49,23 @@ export async function POST(req: NextRequest) {
     const { text, claims }: { text: string; claims: ExtractedClaim[] } = await req.json();
     if (!claims?.length) return NextResponse.json({ error: 'Claims are required' }, { status: 400 });
 
-    const allRules = getAllRules();
-
     const results: VerificationResult[] = await Promise.all(
       claims.map(async claim => {
-        // Use match engine to find most relevant candidate rules
-        const candidates = findCandidates(claim, 12);
-        const candidateRules = candidates.length > 0
-          ? candidates.map(m => m.rule)
-          : allRules.slice(0, 15);
+        // Use the indexed match engine — never falls back to raw slice(0,15)
+        const candidates = findCandidates(claim, 15);
+        // If the retriever/matcher found nothing, skip the LLM call — unknown
+        const candidateRules = candidates.map(m => m.rule);
+
+        // Short-circuit: no candidates → mark unknown without wasting an LLM call
+        if (candidateRules.length === 0) {
+          return {
+            claim,
+            status: 'unknown' as const,
+            matchedRule: undefined,
+            explanation: 'No matching Ontario Fire Code rules found for this claim.',
+            confidence: 'Low' as const,
+          };
+        }
 
         let parsed: {
           status: VerificationResult['status'];
@@ -79,7 +87,7 @@ export async function POST(req: NextRequest) {
         }
 
         const matchedRule = parsed.matchedRuleId
-          ? (allRules.find(r => r.id === parsed.matchedRuleId) ?? candidateRules[0])
+          ? (getRuleById(parsed.matchedRuleId) ?? candidateRules[0])
           : undefined;
 
         // Deterministic override: if the LLM said "verified" but the claimed

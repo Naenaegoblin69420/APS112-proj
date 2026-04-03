@@ -30,6 +30,8 @@ export interface ExtractedClaim {
   value: string;
   unit?: string;
   buildingType?: string;
+  /** Ontario Fire Code section reference cited in the claim, e.g. "2.4.4.2(3)(a)" */
+  sectionReference?: string;
 }
 
 export interface VerificationResult {
